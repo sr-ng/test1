@@ -56,7 +56,7 @@ env:
   SERVICE: first-service1 # TODO: update Cloud Run service name
   REGION: us-central1 # TODO: update Cloud Run service region
   PROFILE: dev
-  USER_NAME: test_user from git test
+  USER_NAME: test_user from git
 
 jobs:
   deploy:
