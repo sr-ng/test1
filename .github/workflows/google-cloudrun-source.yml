@@ -52,7 +52,7 @@ on:
       - main
 
 env:
-  PROJECT_ID: single-frame-342010 # TODO: update Google Cloud project id
+  PROJECT_ID: poc-cyber-cloud-sec-1152121 # TODO: update Google Cloud project id
   SERVICE: first-service1 # TODO: update Cloud Run service name
   REGION: us-central1 # TODO: update Cloud Run service region
   PROFILE: dev
