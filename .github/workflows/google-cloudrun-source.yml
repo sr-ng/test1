@@ -44,7 +44,7 @@
 #   Cloud Run builds from source        - https://cloud.google.com/run/docs/deploying-source-code
 #   Principle of least privilege        - https://cloud.google.com/blog/products/identity-security/dont-get-pwned-practicing-the-principle-of-least-privilege
 
-name: Deploy to Cloud Run from Source
+name: Build and Deploy to Cloud Run
 
 on:
   push:
@@ -53,10 +53,9 @@ on:
 
 env:
   PROJECT_ID: poc-cyber-cloud-sec-1152121 # TODO: update Google Cloud project id
+  GAR_LOCATION: gcr.io # TODO: update Artifact Registry location
   SERVICE: first-service1 # TODO: update Cloud Run service name
   REGION: us-central1 # TODO: update Cloud Run service region
-  PROFILE: dev
-  USER_NAME: test_user from git
 
 jobs:
   deploy:
@@ -71,9 +70,10 @@ jobs:
         uses: actions/checkout@v2
 
       #- name: Google Auth
-      #  id: auth 
+      #  id: auth
       #  uses: 'google-github-actions/auth@v0'
       #  with:
+      #    token_format: 'access_token'
       #    workload_identity_provider: '${{ secrets.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
       #    service_account: '${{ secrets.WIF_SERVICE_ACCOUNT }}' # e.g. - my-service-account@my-project.iam.gserviceaccount.com
 
@@ -82,7 +82,21 @@ jobs:
         id: auth
         uses: 'google-github-actions/auth@v0'
         with:
-           credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      - name: Package App
+        run: mvn package -DskipTests
+        
+      # BEGIN - Docker auth and build (NOTE: If you already have a container image, these Docker steps can be omitted)
+      # Authenticate Docker to Google Cloud Artifact Registry
+      - name: Authorize Docker push
+        run: gcloud auth configure-docker
+
+      - name: Build and Push Container
+        run: |-
+          docker build -t "${{ env.GAR_LOCATION }}/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }}" ./
+          docker push "${{ env.GAR_LOCATION }}/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }}"
+      # END - Docker auth and build
 
       - name: Deploy to Cloud Run
         id: deploy
@@ -90,8 +104,8 @@ jobs:
         with:
           service: ${{ env.SERVICE }}
           region: ${{ env.REGION }}
-          # NOTE: If required, update to the appropriate source folder
-          source: ./
+          # NOTE: If using a pre-built image, update the image name here
+          image: ${{ env.GAR_LOCATION }}/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{ github.sha }}
 
       # If required, use the Cloud Run url output in later steps
       - name: Show Output
