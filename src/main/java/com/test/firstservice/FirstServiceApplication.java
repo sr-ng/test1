@@ -28,6 +28,9 @@ public class FirstServiceApplication implements CommandLineRunner {
 
 	@Value("${myApp.secretVal:defaultsecret}")
 	private String secret;
+	
+	@Value("${test.val:defaultTestValue}")
+	private String testVal;
 
 	public static void main(String[] args) {
 		SpringApplication.run(FirstServiceApplication.class, args);
@@ -41,7 +44,8 @@ public class FirstServiceApplication implements CommandLineRunner {
 
 		System.out.println("Secret Password from environment variable : " + secretPassword);
 
-		System.out.println("Secret value from SecretManager: ------");
+		System.out.println("TEST.VAL value : " + testVal);
+		//System.out.println("Secret value from SecretManager: ------");
 		//getConfig().forEach((k, v) -> System.out.println((k + " : " + v)));
 	}
 
