@@ -85,7 +85,7 @@ jobs:
           credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
       - name: Package App
-        run: mvn package -DskipTests
+        run: mvn package -Dgar.location=${GAR_LOCATION} -DskipTests
         
       # BEGIN - Docker auth and build (NOTE: If you already have a container image, these Docker steps can be omitted)
       # Authenticate Docker to Google Cloud Artifact Registry
